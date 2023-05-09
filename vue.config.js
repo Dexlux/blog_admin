@@ -15,6 +15,8 @@ const name = defaultSettings.title || 'vue Element Admin' // page title
 // port = 9527 npm run dev OR npm run dev --port = 9527
 const port = process.env.port || process.env.npm_config_port || 9527 // dev port
 
+console.log('process.env.NODE_ENV', process.env.NODE_ENV)
+
 // All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
   /**
@@ -36,7 +38,20 @@ module.exports = {
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
+    proxy: {
+      '/api': {
+        // 如果router有效优先取router返回的值
+        target: 'that must have a empty placeholder',
+        changeOrigin: true,
+        // 每次发起http请求都会执行router函数
+        router: () => process.env.VUE_APP_PROXY_URL || '',
+        ws: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    },
+    before: process.env.NODE_ENV === 'development' && require('./mock/mock-server.js')
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
